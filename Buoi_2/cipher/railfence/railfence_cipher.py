@@ -1,7 +1,15 @@
 class RailFenceCipher:
     def __init__(self):
         pass
-
+    def validate_input(self, text, num_rails):
+        if text is None or text == "":
+            raise ValueError("Van ban ko duoc de trong")
+        if not isinstance(num_rails, int):
+            raise ValueError("So rail phai la so nguyen")
+        if num_rails < 2:
+            raise ValueError("So rail phai lon hon hoac bang 2")
+        if num_rails > len(text):
+            raise ValueError("So rail ko duoc lon hon do dai van ban")
     def rail_fence_encrypt(self, plain_text, num_rails):
         rails = [[] for _ in range(num_rails)]
         rail_index = 0

@@ -19,6 +19,8 @@ class VigenereCipher:
         return encrypted_text
 
     def vigenere_decrypt(self, encrypted_text, key):
+        if not key.isalpha():
+            raise ValueError("Key must consist of alphabetic characters only.") 
         decrypted_text = ""
         key_index = 0
         for char in encrypted_text:
