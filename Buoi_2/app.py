@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request
+from html import escape
 
 from cipher.caesar import CaesarCipher
 from cipher.playfair.playfair_cipher import PlayFairCipher
@@ -8,10 +9,54 @@ from cipher.vigenere.vigenere_cipher import VigenereCipher
 app = Flask(__name__)
 
 
+# ================= HÀM HỖ TRỢ =================
+
+def lay_gia_tri_form(field_name, ten_truong):
+    value = request.form.get(field_name, "")
+
+    if value is None or value.strip() == "":
+        raise ValueError(f"{ten_truong} không được để trống")
+
+    return value
+
+
+def lay_khoa_so_nguyen(field_name):
+    key = lay_gia_tri_form(field_name, "Khóa")
+
+    try:
+        return int(key)
+    except ValueError:
+        raise ValueError("Khóa phải là số nguyên")
+
+
+def hien_thi_ket_qua(tieu_de, text, key, result, back_url):
+    return f"""
+    <h3>{escape(tieu_de)}</h3>
+    <p><b>Text:</b> {escape(str(text))}</p>
+    <p><b>Key:</b> {escape(str(key))}</p>
+    <p><b>Result:</b> {escape(str(result))}</p>
+    <br>
+    <a href="{back_url}">Quay lại</a>
+    """
+
+
+def hien_thi_loi(tieu_de, error, back_url):
+    return f"""
+    <h3 style="color:red;">{escape(tieu_de)}</h3>
+    <p><b>Lỗi:</b> {escape(str(error))}</p>
+    <br>
+    <a href="{back_url}">Quay lại</a>
+    """
+
+
+# ================= HOME =================
+
 @app.route('/')
 def home():
     return render_template('index.html')
 
+
+# ================= CAESAR =================
 
 @app.route('/caesar')
 def caesar():
@@ -20,38 +65,55 @@ def caesar():
 
 @app.route('/caesar/encrypt', methods=['POST'])
 def caesar_encrypt():
+    try:
+        text = lay_gia_tri_form('inputPlainText', 'Plain text')
+        key = lay_khoa_so_nguyen('inputKeyPlain')
 
-    text = request.form['inputPlainText']
-    key = int(request.form['inputKeyPlain'])
+        cipher = CaesarCipher()
+        result = cipher.encrypt_text(text, key)
 
-    cipher = CaesarCipher()
+        return hien_thi_ket_qua(
+            "Caesar Encrypt Result",
+            text,
+            key,
+            result,
+            "/caesar"
+        )
 
-    result = cipher.encrypt_text(text, key)
-
-    return f"""
-    <h3>Caesar Encrypt Result</h3>
-    Text: {text}<br>
-    Key: {key}<br>
-    Result: {result}
-    """
+    except ValueError as e:
+        return hien_thi_loi(
+            "Lỗi mã hóa Caesar",
+            e,
+            "/caesar"
+        )
 
 
 @app.route('/caesar/decrypt', methods=['POST'])
 def caesar_decrypt():
+    try:
+        text = lay_gia_tri_form('inputCipherText', 'Cipher text')
+        key = lay_khoa_so_nguyen('inputKeyCipher')
 
-    text = request.form['inputCipherText']
-    key = int(request.form['inputKeyCipher'])
+        cipher = CaesarCipher()
+        result = cipher.decrypt_text(text, key)
 
-    cipher = CaesarCipher()
+        return hien_thi_ket_qua(
+            "Caesar Decrypt Result",
+            text,
+            key,
+            result,
+            "/caesar"
+        )
 
-    result = cipher.decrypt_text(text, key)
+    except ValueError as e:
+        return hien_thi_loi(
+            "Lỗi giải mã Caesar",
+            e,
+            "/caesar"
+        )
 
-    return f"""
-    <h3>Caesar Decrypt Result</h3>
-    Text: {text}<br>
-    Key: {key}<br>
-    Result: {result}
-    """
+
+# ================= PLAYFAIR =================
 
 @app.route('/playfair')
 def playfair():
@@ -60,42 +122,54 @@ def playfair():
 
 @app.route('/playfair/encrypt', methods=['POST'])
 def playfair_encrypt():
+    try:
+        text = lay_gia_tri_form('inputPlainText', 'Plain text')
+        key = lay_gia_tri_form('inputKey', 'Khóa')
 
-    text = request.form['inputPlainText']
-    key = request.form['inputKey']
+        cipher = PlayFairCipher()
+        matrix = cipher.create_playfair_matrix(key)
+        result = cipher.playfair_encrypt(text, matrix)
 
-    cipher = PlayFairCipher()
+        return hien_thi_ket_qua(
+            "Playfair Encrypt Result",
+            text,
+            key,
+            result,
+            "/playfair"
+        )
 
-    matrix = cipher.create_playfair_matrix(key)
-
-    result = cipher.playfair_encrypt(text, matrix)
-
-    return f"""
-    <h3>Playfair Encrypt Result</h3>
-    Text: {text}<br>
-    Key: {key}<br>
-    Result: {result}
-    """
+    except ValueError as e:
+        return hien_thi_loi(
+            "Lỗi mã hóa Playfair",
+            e,
+            "/playfair"
+        )
 
 
 @app.route('/playfair/decrypt', methods=['POST'])
 def playfair_decrypt():
+    try:
+        text = lay_gia_tri_form('inputCipherText', 'Cipher text')
+        key = lay_gia_tri_form('inputKey', 'Khóa')
 
-    text = request.form['inputCipherText']
-    key = request.form['inputKey']
+        cipher = PlayFairCipher()
+        matrix = cipher.create_playfair_matrix(key)
+        result = cipher.playfair_decrypt(text, matrix)
 
-    cipher = PlayFairCipher()
+        return hien_thi_ket_qua(
+            "Playfair Decrypt Result",
+            text,
+            key,
+            result,
+            "/playfair"
+        )
 
-    matrix = cipher.create_playfair_matrix(key)
-
-    result = cipher.playfair_decrypt(text, matrix)
-
-    return f"""
-    <h3>Playfair Decrypt Result</h3>
-    Text: {text}<br>
-    Key: {key}<br>
-    Result: {result}
-    """
+    except ValueError as e:
+        return hien_thi_loi(
+            "Lỗi giải mã Playfair",
+            e,
+            "/playfair"
+        )
 
 
 # ================= RAIL FENCE =================
@@ -107,37 +181,52 @@ def railfence():
 
 @app.route('/railfence/encrypt', methods=['POST'])
 def railfence_encrypt():
+    try:
+        text = lay_gia_tri_form('inputPlainText', 'Plain text')
+        key = lay_khoa_so_nguyen('inputKey')
 
-    text = request.form['inputPlainText']
-    key = int(request.form['inputKey'])
+        cipher = RailFenceCipher()
+        result = cipher.rail_fence_encrypt(text, key)
 
-    cipher = RailFenceCipher()
+        return hien_thi_ket_qua(
+            "Rail Fence Encrypt Result",
+            text,
+            key,
+            result,
+            "/railfence"
+        )
 
-    result = cipher.rail_fence_encrypt(text, key)
-
-    return f"""
-    <h3>Rail Fence Encrypt Result</h3>
-    Text: {text}<br>
-    Key: {key}<br>
-    Result: {result}
-    """
+    except ValueError as e:
+        return hien_thi_loi(
+            "Lỗi mã hóa Rail Fence",
+            e,
+            "/railfence"
+        )
 
 
 @app.route('/railfence/decrypt', methods=['POST'])
 def railfence_decrypt():
+    try:
+        text = lay_gia_tri_form('inputCipherText', 'Cipher text')
+        key = lay_khoa_so_nguyen('inputKey')
 
-    text = request.form['inputCipherText']
-    key = int(request.form['inputKey'])
+        cipher = RailFenceCipher()
+        result = cipher.rail_fence_decrypt(text, key)
 
-    cipher = RailFenceCipher()
+        return hien_thi_ket_qua(
+            "Rail Fence Decrypt Result",
+            text,
+            key,
+            result,
+            "/railfence"
+        )
 
-    result = cipher.rail_fence_decrypt(text, key)
-
-    return f"""
-    Text: {text}<br>
-    Key: {key}<br>
-    Result: {result}
-    """
+    except ValueError as e:
+        return hien_thi_loi(
+            "Lỗi giải mã Rail Fence",
+            e,
+            "/railfence"
+        )
 
 
 # ================= VIGENERE =================
@@ -149,39 +238,55 @@ def vigenere():
 
 @app.route('/vigenere/encrypt', methods=['POST'])
 def vigenere_encrypt():
+    try:
+        text = lay_gia_tri_form('inputPlainText', 'Plain text')
+        key = lay_gia_tri_form('inputKey', 'Khóa')
 
-    text = request.form['inputPlainText']
-    key = request.form['inputKey']
+        cipher = VigenereCipher()
+        result = cipher.vigenere_encrypt(text, key)
 
-    cipher = VigenereCipher()
+        return hien_thi_ket_qua(
+            "Vigenere Encrypt Result",
+            text,
+            key,
+            result,
+            "/vigenere"
+        )
 
-    result = cipher.vigenere_encrypt(text, key)
-
-    return f"""
-    <h3>Vigenere Encrypt Result</h3>
-    Text: {text}<br>
-    Key: {key}<br>
-    Result: {result}
-    """
+    except ValueError as e:
+        return hien_thi_loi(
+            "Lỗi mã hóa Vigenere",
+            e,
+            "/vigenere"
+        )
 
 
 @app.route('/vigenere/decrypt', methods=['POST'])
 def vigenere_decrypt():
+    try:
+        text = lay_gia_tri_form('inputCipherText', 'Cipher text')
+        key = lay_gia_tri_form('inputKey', 'Khóa')
 
-    text = request.form['inputCipherText']
-    key = request.form['inputKey']
+        cipher = VigenereCipher()
+        result = cipher.vigenere_decrypt(text, key)
 
-    cipher = VigenereCipher()
+        return hien_thi_ket_qua(
+            "Vigenere Decrypt Result",
+            text,
+            key,
+            result,
+            "/vigenere"
+        )
 
-    result = cipher.vigenere_decrypt(text, key)
+    except ValueError as e:
+        return hien_thi_loi(
+            "Lỗi giải mã Vigenere",
+            e,
+            "/vigenere"
+        )
 
-    return f"""
-    <h3>Vigenere Decrypt Result</h3>
-    Text: {text}<br>
-    Key: {key}<br>
-    Result: {result}
-    """
 
+# ================= MAIN =================
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5050, debug=True)

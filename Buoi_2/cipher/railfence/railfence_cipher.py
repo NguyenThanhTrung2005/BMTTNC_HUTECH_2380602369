@@ -1,44 +1,69 @@
 class RailFenceCipher:
     def __init__(self):
         pass
-    def validate_input(self, text, num_rails):
-        if text is None or text == "":
-            raise ValueError("Van ban ko duoc de trong")
+
+    def validate_input(self, text, num_rails, text_type):
+        if text is None:
+            raise ValueError(f"{text_type} không được để trống")
+
+        if not isinstance(text, str):
+            raise ValueError(f"{text_type} phải là chuỗi ký tự")
+
+        if text.strip() == "":
+            raise ValueError(f"{text_type} không được chỉ chứa khoảng trắng")
+
+        if num_rails is None:
+            raise ValueError("Số rail không được để trống")
+
         if not isinstance(num_rails, int):
-            raise ValueError("So rail phai la so nguyen")
+            raise ValueError("Số rail phải là số nguyên")
+
         if num_rails < 2:
-            raise ValueError("So rail phai lon hon hoac bang 2")
+            raise ValueError("Số rail phải lớn hơn hoặc bằng 2")
+
         if num_rails > len(text):
-            raise ValueError("So rail ko duoc lon hon do dai van ban")
+            raise ValueError("Số rail không được lớn hơn độ dài văn bản")
+
     def rail_fence_encrypt(self, plain_text, num_rails):
+        self.validate_input(plain_text, num_rails, "Plain text")
+
         rails = [[] for _ in range(num_rails)]
         rail_index = 0
         direction = 1
+
         for char in plain_text:
             rails[rail_index].append(char)
+
             if rail_index == 0:
                 direction = 1
             elif rail_index == num_rails - 1:
                 direction = -1
+
             rail_index += direction
+
         cipher_text = ''.join(''.join(rail) for rail in rails)
         return cipher_text
 
     def rail_fence_decrypt(self, cipher_text, num_rails):
+        self.validate_input(cipher_text, num_rails, "Cipher text")
+
         rail_lengths = [0] * num_rails
         rail_index = 0
         direction = 1
 
         for _ in range(len(cipher_text)):
             rail_lengths[rail_index] += 1
+
             if rail_index == 0:
                 direction = 1
             elif rail_index == num_rails - 1:
                 direction = -1
+
             rail_index += direction
 
         rails = []
         start = 0
+
         for length in rail_lengths:
             rails.append(cipher_text[start:start + length])
             start += length
@@ -50,10 +75,12 @@ class RailFenceCipher:
         for _ in range(len(cipher_text)):
             plain_text += rails[rail_index][0]
             rails[rail_index] = rails[rail_index][1:]
+
             if rail_index == 0:
                 direction = 1
             elif rail_index == num_rails - 1:
                 direction = -1
+
             rail_index += direction
 
         return plain_text
