@@ -3,19 +3,84 @@ class PlayFairCipher:
     def __init__(self):
         pass
 
+    def validate_key(self, key):
+        if key is None:
+            raise ValueError("Khóa không được để trống")
+
+        if not isinstance(key, str):
+            raise ValueError("Khóa phải là chuỗi ký tự")
+
+        if key.strip() == "":
+            raise ValueError("Khóa không được chỉ chứa khoảng trắng")
+
+        key_no_space = key.replace(" ", "")
+
+        if not key_no_space.isalpha():
+            raise ValueError("Khóa chỉ được chứa chữ cái")
+
+    def validate_plain_text(self, plain_text):
+        if plain_text is None:
+            raise ValueError("Plain text không được để trống")
+
+        if not isinstance(plain_text, str):
+            raise ValueError("Plain text phải là chuỗi ký tự")
+
+        if plain_text.strip() == "":
+            raise ValueError("Plain text không được chỉ chứa khoảng trắng")
+
+        plain_text_no_space = plain_text.replace(" ", "")
+
+        if plain_text_no_space == "":
+            raise ValueError("Plain text phải chứa ít nhất một chữ cái")
+
+        if not plain_text_no_space.isalpha():
+            raise ValueError("Plain text chỉ được chứa chữ cái và khoảng trắng")
+
+    def validate_cipher_text(self, cipher_text):
+        if cipher_text is None:
+            raise ValueError("Cipher text không được để trống")
+
+        if not isinstance(cipher_text, str):
+            raise ValueError("Cipher text phải là chuỗi ký tự")
+
+        if cipher_text.strip() == "":
+            raise ValueError("Cipher text không được chỉ chứa khoảng trắng")
+
+        cipher_text_no_space = cipher_text.replace(" ", "")
+
+        if cipher_text_no_space == "":
+            raise ValueError("Cipher text phải chứa ít nhất một chữ cái")
+
+        if not cipher_text_no_space.isalpha():
+            raise ValueError("Cipher text chỉ được chứa chữ cái và khoảng trắng")
+
+        if len(cipher_text_no_space) % 2 != 0:
+            raise ValueError("Độ dài Cipher text sau khi bỏ khoảng trắng phải là số chẵn")
+
+    def validate_matrix(self, matrix):
+        if matrix is None:
+            raise ValueError("Ma trận Playfair không được để trống")
+
+        if not isinstance(matrix, list):
+            raise ValueError("Ma trận Playfair không hợp lệ")
+
+        if len(matrix) != 5:
+            raise ValueError("Ma trận Playfair phải có 5 dòng")
+
+        for row in matrix:
+            if not isinstance(row, list):
+                raise ValueError("Mỗi dòng của ma trận Playfair phải là danh sách")
+
+            if len(row) != 5:
+                raise ValueError("Mỗi dòng của ma trận Playfair phải có 5 ký tự")
+
     def create_playfair_matrix(self, key):
+        self.validate_key(key)
 
-        # Kiểm tra key
-        if not key:
-            raise ValueError("Key cannot be empty")
+        key = key.upper().replace("J", "I").replace(" ", "")
 
-        if not key.isalpha():
-            raise ValueError("Key must contain letters only")
-
-        key = key.upper().replace("J", "I")
-
-        # Loại bỏ ký tự trùng lặp trong key
         unique_key = ""
+
         for char in key:
             if char not in unique_key:
                 unique_key += char
@@ -36,33 +101,36 @@ class PlayFairCipher:
         return playfair_matrix
 
     def find_letter_coords(self, matrix, letter):
+        self.validate_matrix(matrix)
+
+        if letter is None:
+            raise ValueError("Ký tự cần tìm không được để trống")
+
+        if not isinstance(letter, str):
+            raise ValueError("Ký tự cần tìm phải là chuỗi")
+
+        if len(letter) != 1:
+            raise ValueError("Chỉ được tìm một ký tự trong ma trận")
+
+        letter = letter.upper().replace("J", "I")
 
         for row in range(len(matrix)):
             for col in range(len(matrix[row])):
                 if matrix[row][col] == letter:
                     return row, col
 
-        raise ValueError(f"Letter '{letter}' not found in matrix")
+        raise ValueError(f"Ký tự '{letter}' không tồn tại trong ma trận Playfair")
 
     def playfair_encrypt(self, plain_text, matrix):
-
-        # Kiểm tra dữ liệu đầu vào
-        if not plain_text:
-            raise ValueError("Plain text cannot be empty")
+        self.validate_plain_text(plain_text)
+        self.validate_matrix(matrix)
 
         plain_text = plain_text.replace(" ", "")
-
-        if not plain_text.isalpha():
-            raise ValueError(
-                "Plain text must contain letters only"
-            )
-
         plain_text = plain_text.upper().replace("J", "I")
 
         encrypted_text = ""
 
         for i in range(0, len(plain_text), 2):
-
             pair = plain_text[i:i + 2]
 
             if len(pair) == 1:
@@ -79,7 +147,6 @@ class PlayFairCipher:
             )
 
             if row1 == row2:
-
                 encrypted_text += (
                     matrix[row1][(col1 + 1) % 5]
                     +
@@ -87,7 +154,6 @@ class PlayFairCipher:
                 )
 
             elif col1 == col2:
-
                 encrypted_text += (
                     matrix[(row1 + 1) % 5][col1]
                     +
@@ -95,7 +161,6 @@ class PlayFairCipher:
                 )
 
             else:
-
                 encrypted_text += (
                     matrix[row1][col2]
                     +
@@ -105,29 +170,15 @@ class PlayFairCipher:
         return encrypted_text
 
     def playfair_decrypt(self, cipher_text, matrix):
-
-        # Kiểm tra dữ liệu đầu vào
-        if not cipher_text:
-            raise ValueError("Cipher text cannot be empty")
+        self.validate_cipher_text(cipher_text)
+        self.validate_matrix(matrix)
 
         cipher_text = cipher_text.replace(" ", "")
-
-        if not cipher_text.isalpha():
-            raise ValueError(
-                "Cipher text must contain letters only"
-            )
-
-        if len(cipher_text) % 2 != 0:
-            raise ValueError(
-                "Cipher text length must be even"
-            )
-
-        cipher_text = cipher_text.upper()
+        cipher_text = cipher_text.upper().replace("J", "I")
 
         decrypted_text = ""
 
         for i in range(0, len(cipher_text), 2):
-
             pair = cipher_text[i:i + 2]
 
             row1, col1 = self.find_letter_coords(
@@ -141,7 +192,6 @@ class PlayFairCipher:
             )
 
             if row1 == row2:
-
                 decrypted_text += (
                     matrix[row1][(col1 - 1) % 5]
                     +
@@ -149,7 +199,6 @@ class PlayFairCipher:
                 )
 
             elif col1 == col2:
-
                 decrypted_text += (
                     matrix[(row1 - 1) % 5][col1]
                     +
@@ -157,21 +206,17 @@ class PlayFairCipher:
                 )
 
             else:
-
                 decrypted_text += (
                     matrix[row1][col2]
                     +
                     matrix[row2][col1]
                 )
 
-        # Khôi phục bản rõ giống code gốc
         banro = ""
 
         for i in range(0, len(decrypted_text) - 2, 2):
-
             if decrypted_text[i] == decrypted_text[i + 2]:
                 banro += decrypted_text[i]
-
             else:
                 banro += (
                     decrypted_text[i]
@@ -180,10 +225,8 @@ class PlayFairCipher:
                 )
 
         if len(decrypted_text) >= 2:
-
             if decrypted_text[-1] == "X":
                 banro += decrypted_text[-2]
-
             else:
                 banro += decrypted_text[-2]
                 banro += decrypted_text[-1]
