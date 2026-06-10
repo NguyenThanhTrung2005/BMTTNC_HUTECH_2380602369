@@ -15,6 +15,14 @@
         </tr>
 
         <tr>
+            <td>
+                <a href="/" class="btn btn-secondary">
+                    Trang chủ
+                </a>
+            </td>
+        </tr>
+
+        <tr>
             <td style="font-weight: bold; color: blue">
                 ENCRYPTION
             </td>
@@ -54,35 +62,33 @@
             </td>
         </tr>
 
-       <tr>
-    <td>
-        <form method="POST" action="/railfence/decrypt">
+        <tr>
+            <td>
+                <form method="POST" action="/railfence/decrypt">
+                    <div class="mb-3">
+                        <label class="form-label">Cipher text:</label>
 
-            <div class="mb-3">
-                <label class="form-label">Cipher text:</label>
+                        <input type="text" class="form-control"
+                               name="inputCipherText"
+                               placeholder="Input Cipher Text"
+                               required/>
+                    </div>
 
-                <input type="text" class="form-control"
-                       name="inputCipherText"
-                       placeholder="Input Cipher Text"
-                       required/>
-            </div>
+                    <div class="mb-3">
+                        <label class="form-label">Key:</label>
 
-            <div class="mb-3">
-                <label class="form-label">Key:</label>
+                        <input type="number" class="form-control"
+                               name="inputKey"
+                               placeholder="Input Key"
+                               required/>
+                    </div>
 
-                <input type="number" class="form-control"
-                       name="inputKey"
-                       placeholder="Input Key"
-                       required/>
-            </div>
-
-            <button type="submit" class="btn btn-success">
-                Decrypt
-            </button>
-
-        </form>
-    </td>
-</tr>
+                    <button type="submit" class="btn btn-success">
+                        Decrypt
+                    </button>
+                </form>
+            </td>
+        </tr>
     </table>
 </div>
 

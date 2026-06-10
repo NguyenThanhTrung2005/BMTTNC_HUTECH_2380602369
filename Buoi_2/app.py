@@ -119,6 +119,46 @@ def caesar_decrypt():
 def playfair():
     return render_template('playfair.html')
 
+@app.route('/playfair/creatematrix', methods=['POST'])
+def playfair_creatematrix():
+    try:
+        key = lay_gia_tri_form('inputKeyMatrix', 'Khóa')
+
+        cipher = PlayFairCipher()
+        matrix = cipher.create_playfair_matrix(key)
+
+        matrix_html = "<table class='table table-bordered text-center' style='width: 300px;'>"
+
+        for row in matrix:
+            matrix_html += "<tr>"
+            for char in row:
+                matrix_html += f"<td><b>{escape(str(char))}</b></td>"
+            matrix_html += "</tr>"
+
+        matrix_html += "</table>"
+
+        return f"""
+        <h3>Playfair Matrix Result</h3>
+        <p><b>Key:</b> {escape(str(key))}</p>
+        {matrix_html}
+
+        <br>
+
+        <a href="/playfair">
+            <button>Quay lại Playfair</button>
+        </a>
+
+        <a href="/">
+            <button>Trang chủ</button>
+        </a>
+        """
+
+    except ValueError as e:
+        return hien_thi_loi(
+            "Lỗi tạo ma trận Playfair",
+            e,
+            "/playfair"
+        )
 
 @app.route('/playfair/encrypt', methods=['POST'])
 def playfair_encrypt():
