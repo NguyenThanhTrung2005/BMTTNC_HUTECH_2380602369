@@ -9,7 +9,7 @@ class MyApp(QMainWindow):
         super().__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.setWindowTitle("Caesar Cipher - Nguyễn Thanh Trung - 2380602369")
+        self.setWindowTitle("PlayFair Cipher - Nguyễn Thanh Trung - 2380602369")
         self.ui.pushEncrypt.clicked.connect(self.call_api_encrypt)
         self.ui.pushDecrypt.clicked.connect(self.call_api_decrypt)
         self.ui.pushCreateMatrix.clicked.connect(self.call_api_create_matrix)

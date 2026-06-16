@@ -25,8 +25,8 @@ class CaesarCipher:
         if not isinstance(key, int):
             raise ValueError("Khóa phải là số nguyên")
 
-        if key < 0:
-            raise ValueError("Khóa không được là số âm")
+        if key < 1 or key > 25:
+            raise ValueError("Khóa phải nằm trong khoảng từ 1 đến 25")
 
     def encrypt_text(self, text: str, key: int) -> str:
         self.validate_text(text, "Plain text")
